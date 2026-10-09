@@ -1,3 +1,4 @@
+
 package SRMSMiniProject1.StuedentManagement;
 
 import java.util.ArrayList;
@@ -11,8 +12,13 @@ public class StudentManagementImpl implements StudentManagement {
     public StudentManagementImpl() {
         fileHandler = new FileHandler();
         students = fileHandler.loadStudents();
+
+        if (students == null) {
+            students = new ArrayList<>();
+        }
     }
 
+    // Add Student
     @Override
     public void addStudent(Scanner scanner) {
 
@@ -21,13 +27,18 @@ public class StudentManagementImpl implements StudentManagement {
         System.out.println("Student ID: " + id);
 
         System.out.print("Enter Student Name: ");
-        String name = scanner.nextLine();
+        String name = scanner.nextLine().trim();
+
+        if (name.isEmpty()) {
+            System.out.println("Student name cannot be empty.");
+            return;
+        }
 
         System.out.print("Enter Student Age: ");
         int age;
 
         try {
-            age = Integer.parseInt(scanner.nextLine());
+            age = Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid age.");
             return;
@@ -39,13 +50,22 @@ public class StudentManagementImpl implements StudentManagement {
         }
 
         System.out.print("Enter Student Batch: ");
-        String batch = scanner.nextLine();
+        String batch = scanner.nextLine().trim();
+
+        if (batch.isEmpty()) {
+            System.out.println("Student batch cannot be empty.");
+            return;
+        }
 
         System.out.print("Enter Class Timing: ");
-        String timing = scanner.nextLine();
+        String timing = scanner.nextLine().trim();
 
-        Student student = new Student(
-                id, name, age, batch, timing);
+        if (timing.isEmpty()) {
+            System.out.println("Class timing cannot be empty.");
+            return;
+        }
+
+        Student student = new Student(id, name, age, batch, timing);
 
         students.add(student);
 
@@ -57,6 +77,7 @@ public class StudentManagementImpl implements StudentManagement {
         }
     }
 
+    // View Students
     @Override
     public void viewStudents() {
 
@@ -72,15 +93,22 @@ public class StudentManagementImpl implements StudentManagement {
         }
     }
 
+    // Update Student
     @Override
     public void updateStudent(Scanner scanner) {
 
-        System.out.print("Enter Student ID to update: ");
+        if (students.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
 
+        viewStudents();
+
+        System.out.print("Enter Student ID to update: ");
         int id;
 
         try {
-            id = Integer.parseInt(scanner.nextLine());
+            id = Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid Student ID.");
             return;
@@ -93,39 +121,57 @@ public class StudentManagementImpl implements StudentManagement {
             return;
         }
 
-        String oldName = student.getStudentName();
-        int oldAge = student.getStudentAge();
-        String oldBatch = student.getStudentBatch();
-        String oldTiming = student.getStudentClassTiming();
-
+        // Collect and validate new details first
         System.out.print("Enter new Name: ");
-        student.setStudentName(scanner.nextLine());
+        String name = scanner.nextLine().trim();
+
+        if (name.isEmpty()) {
+            System.out.println("Student name cannot be empty.");
+            return;
+        }
 
         System.out.print("Enter new Age: ");
-
         int age;
 
         try {
-            age = Integer.parseInt(scanner.nextLine());
+            age = Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid age.");
-            student.setStudentName(oldName);
             return;
         }
 
         if (age < 18) {
             System.out.println("Student age must be 18 or older.");
-            student.setStudentName(oldName);
             return;
         }
 
-        student.setStudentAge(age);
-
         System.out.print("Enter new Batch: ");
-        student.setStudentBatch(scanner.nextLine());
+        String batch = scanner.nextLine().trim();
+
+        if (batch.isEmpty()) {
+            System.out.println("Student batch cannot be empty.");
+            return;
+        }
 
         System.out.print("Enter new Class Timing: ");
-        student.setStudentClassTiming(scanner.nextLine());
+        String timing = scanner.nextLine().trim();
+
+        if (timing.isEmpty()) {
+            System.out.println("Class timing cannot be empty.");
+            return;
+        }
+
+        // Keep old details for rollback
+        String oldName = student.getStudentName();
+        int oldAge = student.getStudentAge();
+        String oldBatch = student.getStudentBatch();
+        String oldTiming = student.getStudentClassTiming();
+
+        // Apply updates only after validation
+        student.setStudentName(name);
+        student.setStudentAge(age);
+        student.setStudentBatch(batch);
+        student.setStudentClassTiming(timing);
 
         if (fileHandler.saveStudents(students)) {
             System.out.println("Student updated successfully!");
@@ -135,19 +181,28 @@ public class StudentManagementImpl implements StudentManagement {
             student.setStudentBatch(oldBatch);
             student.setStudentClassTiming(oldTiming);
 
-            System.out.println("Unable to save changes.");
+            System.out.println(
+                    "Unable to save changes. Original details restored.");
         }
     }
 
+    // Delete Student
     @Override
     public void deleteStudent(Scanner scanner) {
 
-        System.out.print("Enter Student ID to delete: ");
+        if (students.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
 
+        // Display list before asking for ID
+        viewStudents();
+
+        System.out.print("Enter Student ID to delete: ");
         int id;
 
         try {
-            id = Integer.parseInt(scanner.nextLine());
+            id = Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid Student ID.");
             return;
@@ -160,25 +215,34 @@ public class StudentManagementImpl implements StudentManagement {
             return;
         }
 
-        students.remove(student);
+        // Preserve the original position
+        int index = students.indexOf(student);
+        students.remove(index);
 
         if (fileHandler.saveStudents(students)) {
             System.out.println("Student deleted successfully!");
         } else {
-            students.add(student);
-            System.out.println("Unable to save changes.");
+            students.add(index, student);
+
+            System.out.println(
+                    "Unable to save changes. Student details restored.");
         }
     }
 
+    // Search Student
     @Override
     public void searchStudent(Scanner scanner) {
 
-        System.out.print("Enter Student ID to search: ");
+        if (students.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
 
+        System.out.print("Enter Student ID to search: ");
         int id;
 
         try {
-            id = Integer.parseInt(scanner.nextLine());
+            id = Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid Student ID.");
             return;
@@ -189,10 +253,12 @@ public class StudentManagementImpl implements StudentManagement {
         if (student == null) {
             System.out.println("Student not found.");
         } else {
+            System.out.println("\nStudent Details:");
             displayStudent(student);
         }
     }
 
+    // Generate the next Student ID
     private int getNextStudentId() {
 
         int maxId = 0;
@@ -206,6 +272,7 @@ public class StudentManagementImpl implements StudentManagement {
         return maxId + 1;
     }
 
+    // Find Student by ID
     private Student findStudent(int id) {
 
         for (Student student : students) {
@@ -217,6 +284,7 @@ public class StudentManagementImpl implements StudentManagement {
         return null;
     }
 
+    // Display Student Details
     private void displayStudent(Student student) {
 
         System.out.println("--------------------------");
@@ -225,5 +293,6 @@ public class StudentManagementImpl implements StudentManagement {
         System.out.println("Student Age  : " + student.getStudentAge());
         System.out.println("Student Batch: " + student.getStudentBatch());
         System.out.println("Class Timing : " + student.getStudentClassTiming());
+        System.out.println("--------------------------");
     }
 }
