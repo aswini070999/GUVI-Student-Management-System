@@ -1,0 +1,12 @@
+Student ID   | Student Name         | Student Age  | Student Batch    | Class Timing   
+-----------------------------------------------------------------------------------------
+1            | Guvi                 | 30           | FSD-C-WD-T-B93   | 6PM            
+2            | Keerthi              | 28           | FSD-C-WD-T-B93   | 6PM            
+3            | Aruvi                | 30           | FSD-C-WD-T-B93   | 6PM            
+4            | Hema                 | 20           | FSD-C-WD-T-B93   | 6PM            
+5            | vaishnavi            | 28           | FSD-C-WD-T-B93   | 6PM            
+6            | Nancy                | 24           | FSD-C-WD-T-B93   | 6PM            
+7            | Malini               | 25           | FSD-C-WD-T-B93   | 6PM            
+8            | Maha                 | 27           | FSD-C-WD-T-B93   | 6PM            
+9            | Muthu                | 27           | FSD-C-WD-T-B93   | 6PM            
+10           | Kiran                | 24           | FSD-C-WD-T-B93   | 6PM            
